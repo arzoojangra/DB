@@ -3,6 +3,8 @@ const connection = require("./config");
 const cors = require("cors");
 var moment = require("moment");
 const { body, validationResult } = require("express-validator");
+const address = require("address");
+const NodeGeocoder = require("node-geocoder");
 
 const api2 = express();
 
@@ -19,9 +21,11 @@ api2.get("/", (req, res) => {
   );
 }); //read   working
 
+//from_unixtime(ImageTime, '%D %M %Y %h:%i %p') as ImageTime, Latitude, Longitude
+
 api2.get("/:id", (req, res) => {
   connection.query(
-    "SELECT ID, Name, Contact, Email, PAN, Aadhar, Image FROM UserList WHERE ID =" +
+    "SELECT ID, Name, Contact, Email, PAN, Aadhar, Image, FROM UserList WHERE ID =" +
       req.params.id,
     (err, result) => {
       if (err) res.send("error");
@@ -84,8 +88,6 @@ api2.post(
 
 api2.put("/:id", (req, res) => {
   var currTime = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-  // const data = req.body;
-
   const data = [
     req.body.Name,
     req.body.Contact,
@@ -121,11 +123,25 @@ api2.delete("/:id", (req, res) => {
 }); //delete
 
 api2.put("/image/:id", (req, res) => {
-  const img = req.body.Image;
+  var currTime = moment().unix();
+  let ipAddress;
+
+  address((err, addrs) => {
+    ipAddress = addrs.ip;
+    console.log(ipAddress);
+  });
+  const data = [
+    req.body.Image,
+    req.body.Latitude,
+    req.body.Longitude,
+    currTime,
+    ipAddress,
+  ];
 
   connection.query(
-    "UPDATE UserList SET Image=? WHERE ID = " + req.params.id,
-    img,
+    "UPDATE UserList SET Image=?, Latitude=?, Longitude=?, ImageTime=?, ImageIP=? WHERE ID = " +
+      req.params.id,
+    data,
     (err, result) => {
       if (err) {
         return res.status(403).json({ mesage: err.sqlMessage });
@@ -134,45 +150,5 @@ api2.put("/image/:id", (req, res) => {
     }
   );
 }); //update
-
-// api2.post("/", (req, resp) => {
-//   // req.body.Created_File_Time = moment().unix();
-//   const data = req.body;
-//   // const data = req.body.Email;
-//   var flag = false;
-//   console.log(data);
-//   // console.log(moment().format("MMMM Do YYYY, h:mm:ss a"));
-//   // const response = validateUser(data);
-//   // if (response.error) {
-//   //   console.log(response.error.details);
-//   // } else {
-//   connection.query(
-//     `Select * from UserList where Email= '${data.Email}'`,
-//     (error, result) => {
-//       if (error) {
-//         console.log(error);
-//       }
-//       // console.log(result);
-//       // return;
-//       if (result.length > 0) {
-//         flag = true;
-//       }
-//       if (!flag) {
-//         con.query("Insert into UserList set ?", [data], (err, result) => {
-//           if (err) {
-//             console.log(err.message);
-//             // resp.send("error");
-//             console.log(err);
-//           }
-//           resp.send(result);
-//         });
-//       } else {
-//         console.log("Duplicate Entry");
-//         resp.send("Already resgistered Email ID");
-//       }
-//     }
-//   );
-//   // }
-// });
 
 api2.listen(3002);

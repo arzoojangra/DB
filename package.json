@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "address": "^1.2.2",
     "colors": "^1.4.0",
     "cors": "^2.8.5",
     "ejs": "^3.1.8",
@@ -17,11 +18,12 @@
     "express-validator": "^6.15.0",
     "moment": "^2.29.4",
     "mysql": "^2.18.1",
+    "node-geocoder": "^4.2.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.20.7",
     "@babel/core": "^7.20.12",
-    "nodemon": "^2.0.20"
+    "nodemon": "^2.0.21"
   }
 }
